@@ -1,0 +1,15 @@
+Package: nvdastocks
+Title: Explore the Risk and Return of NVIDIA Shares
+Version: 0.0.1
+Authors@R: 
+    person("Duc", "Hoang", , "duchoang4113@gmail.com", role = "author")
+Description: Provides daily NVIDIA (NVDA) share prices with moving averages and volatility, 
+    a function that follows the value of an investment over a chosen period, 
+    a Shiny app for exploring what an investor would have gained and how far the investment fell along the way.
+License: MIT
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+LazyData: true
+Imports: 
+    dplyr
+Config/roxygen2/version: 8.1.0
