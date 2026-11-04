@@ -4,27 +4,44 @@ library(dplyr)
 library(ggplot2)
 library(nvdastocks)
 
+nvda_colours <- c(
+  page   = "#000000",
+  card   = "#1A1A1A",
+  green  = "#76B900",
+  text   = "#FFFFFF",
+  muted  = "#A6A6A6",
+  down   = "#E5484D",
+  orange = "#df720c"
+)
+
 nvidia_theme <- bs_theme(
-  bg = "#000000",        # page background
-  fg = "#FFFFFF",        # main text
-  primary = "#76B900",   # NVIDIA green: buttons, links, highlights
-  secondary = "#A6A6A6", # muted grey
-  danger = "#E5484D"     # red for down days
+  bg = nvda_colours[["page"]],
+  fg = nvda_colours[["text"]],
+  primary = nvda_colours[["green"]],
+  secondary = nvda_colours[["muted"]],
+  danger = nvda_colours[["down"]],
+  "card-bg" = nvda_colours[["card"]]
 )
 
 theme_nvda_plots <- function(base_size = 15) {
   theme_minimal(base_size = base_size) +
     theme(
+      plot.background = element_rect(fill = nvda_colours[["card"]], colour = NA),
+      panel.background = element_rect(fill = nvda_colours[["card"]], colour = NA),
+      panel.grid.major = element_line(colour = "#333333"),
       panel.grid.minor = element_blank(),
+      text = element_text(colour = nvda_colours[["text"]]),
+      axis.text = element_text(colour = nvda_colours[["muted"]]),
       legend.position = "bottom"
     )
 }
 
-ui <- fluidPage(
+ui <- page_sidebar(
   theme = nvidia_theme,
-  page_sidebar(
-  title = "What would investing in NVIDIA worth in the future ?",
+  title = span("What would investing in NVIDIA worth in the future ?",
+               style = paste0("color: ", nvda_colours[["orange"]], "; font-weight: bold;")),
   sidebar = sidebar(
+    bg = nvda_colours[["card"]],
     dateRangeInput(
       "period", "Choose an investment period",
       start = as.Date("2020-01-02"), end = max(nvda$date),
@@ -32,20 +49,19 @@ ui <- fluidPage(
     ),
     numericInput("amount", "Amount invested (US$)", value = 1000, min = 1),
     checkboxInput("log_scale", "Compare growth in % (log scale)", FALSE),
-    p("NVIDIA’s early prices were only cents, so on a normal chart those years look flat. Tick this to see how much they really rose and fell.", style = "font-size: 0.85em; color: grey;"),
+    p("NVIDIA’s early prices were only cents, so on a normal chart those years look flat. Tick this to see how much they really rose and fell.", style = paste0("font-size: 0.85em; color: ", nvda_colours[["muted"]], ";")),
     conditionalPanel(condition = "input.main_tab == 'risk'",
     checkboxInput("show_sma", "Show 20- and 50-day averages", TRUE))
   ), navset_card_tab(
   id = "main_tab",
   nav_panel("How much would I have gained?", value = "gain",
           h3(textOutput("gain_headline", inline = TRUE)),
-          p("The blue line is what your investment was worth each day. Above the dashed line is a gain; below it is a loss."),
+          p("The green line is what your investment was worth each day. Above the dashed line is a gain; below it is a loss."),
           plotly::plotlyOutput("gain_plot")),
   nav_panel("When did it fall, and how far?", value = "risk",
           h3(textOutput("risk_headline", inline = TRUE)),
           p("Top: the share price. Bottom: how far it was below its highest price so far. Drag across either chart to zoom both; double-click to reset."),
           plotly::plotlyOutput("price_drop_plot", height = "600px"))
-)
 )
 )
 
@@ -63,10 +79,10 @@ server <- function(input, output, session) {
 
   output$gain_plot <- plotly::renderPlotly({
     p <- ggplot(period_data(), aes(date, value)) +
-      geom_hline(yintercept = input$amount, linetype = "dashed", colour = "#df720c", linewidth = 0.8) +
+      geom_hline(yintercept = input$amount, linetype = "dashed", colour = nvda_colours[["orange"]], linewidth = 0.8) +
       geom_line(aes(group = 1, text = paste0(format(date, "%d %b %Y"),
                                        "<br>Worth: ", scales::dollar(value))),
-          colour = "#006DAE") +
+          colour = nvda_colours[["green"]]) +
       labs(x = NULL, y = "Value of investment (US$)") +
       theme_nvda_plots()
     if (input$log_scale) {
@@ -95,18 +111,18 @@ server <- function(input, output, session) {
   }
   price <- price +
     scale_colour_manual(values = c(
-      "Closing price" = "grey40",
-      "20-day average" = "#006DAE",
-      "50-day average" = "#D55E00"
+      "Closing price" = nvda_colours[["text"]],
+      "20-day average" = nvda_colours[["green"]],
+      "50-day average" = nvda_colours[["orange"]]
     )) +
     labs(x = NULL, y = "Share price (US$)", colour = NULL) +
     theme_nvda_plots()
 
   drop <- ggplot(df, aes(date, drawdown_pct)) +
-    geom_area(fill = "#D55E00", alpha = 0.4) +
+    geom_area(fill = nvda_colours[["down"]], alpha = 0.4) +
     geom_line(aes(group = 1, text = paste0(format(date, "%d %b %Y"),
                                            "<br>Below its peak by: ", round(abs(drawdown_pct)), "%")),
-              colour = "#D55E00") +
+              colour = nvda_colours[["down"]]) +
     labs(x = NULL, y = "Fall from peak") +
     theme_nvda_plots()
 
@@ -116,6 +132,7 @@ server <- function(input, output, session) {
     nrows = 2, shareX = TRUE, heights = c(0.6, 0.4), titleY = TRUE
   ) |>
     plotly::layout(
+      showlegend = TRUE,
       legend = list(orientation = "h", y = 1.08),
       yaxis = list(tickprefix = "$", type = if (input$log_scale) "log" else "linear"),
       yaxis2 = list(ticksuffix = "%")
