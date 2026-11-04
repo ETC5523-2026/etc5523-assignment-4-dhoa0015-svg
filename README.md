@@ -46,6 +46,7 @@ the same licence.
 
 I have used AI in this project to helps me naviagte between task, and
 extensively apply the theme and color to the Shiny app dashboards. The
-git commit show that extensive changes. - The link to the AI
-conversation:
-[Link](https://claude.ai/share/71bd9479-2474-46b5-9b6b-ea26c98511b9)
+git commit show that extensive changes.
+
+- The link to the AI conversation:
+  [Link](https://claude.ai/share/71bd9479-2474-46b5-9b6b-ea26c98511b9)
