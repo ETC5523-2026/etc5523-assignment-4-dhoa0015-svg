@@ -3,7 +3,7 @@
 \docType{data}
 \name{nvda}
 \alias{nvda}
-\title{Daily NVIDIA share prices}
+\title{Daily NVIDIA stock prices}
 \format{
 A data frame with 6,958 rows and 10 columns. Each row is one trading day:
 \describe{

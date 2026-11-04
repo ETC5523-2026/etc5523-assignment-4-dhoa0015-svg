@@ -6,11 +6,21 @@ Authors@R:
 Description: Provides daily NVIDIA (NVDA) share prices with moving averages and volatility, 
     a function that follows the value of an investment over a chosen period, 
     a Shiny app for exploring what an investor would have gained and how far the investment fell along the way.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
+Depends: 
+    R (>= 4.1.0)
 LazyData: true
 Imports: 
+    bslib,
     dplyr,
-    plotly
+    ggplot2,
+    plotly,
+    scales,
+    shiny
 Config/roxygen2/version: 8.1.0
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
